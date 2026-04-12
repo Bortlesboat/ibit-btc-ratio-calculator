@@ -1,6 +1,6 @@
 # IBIT BTC Ratio Calculator
 
-Small public utility for estimating what `IBIT` is likely worth while Bitcoin is trading and the stock market is closed.
+Open-source `IBIT` to `BTC` ratio calculator and weekend price estimator for BlackRock's iShares Bitcoin Trust ETF.
 
 It uses the latest official `IBIT` snapshot from iShares plus a live or manual `BTC/USD` price anchor to estimate:
 
@@ -8,6 +8,12 @@ It uses the latest official `IBIT` snapshot from iShares plus a live or manual `
 - `ibit_per_btc`
 - estimated `IBIT` share price
 - estimated position value for a share count
+
+Useful for:
+
+- Bitcoin ETF traders checking `IBIT` against weekend Bitcoin moves
+- investors estimating Monday open expectations from a live `BTC/USD` price
+- builders creating Bitcoin ETF dashboards, watchlists, and comparison tools
 
 The app is intentionally static so it can be dropped into any site, repo, or simple hosting setup.
 It is not tied to any specific website deployment.

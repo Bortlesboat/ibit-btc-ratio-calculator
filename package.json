@@ -1,5 +1,6 @@
 {
   "name": "ibit-btc-ratio-calculator",
+  "description": "Open-source IBIT to BTC ratio calculator and weekend price estimator for Bitcoin ETF traders",
   "private": true,
   "type": "module",
   "scripts": {
