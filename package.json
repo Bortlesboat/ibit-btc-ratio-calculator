@@ -3,6 +3,24 @@
   "description": "Open-source IBIT to BTC ratio calculator and weekend price estimator for Bitcoin ETF traders",
   "private": true,
   "type": "module",
+  "homepage": "https://github.com/Bortlesboat/ibit-btc-ratio-calculator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bortlesboat/ibit-btc-ratio-calculator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Bortlesboat/ibit-btc-ratio-calculator/issues"
+  },
+  "keywords": [
+    "ibit",
+    "bitcoin",
+    "btc",
+    "bitcoin-etf",
+    "etf",
+    "calculator",
+    "blackrock",
+    "finance"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -19,5 +37,8 @@
     "vite": "^7.1.0",
     "vite-plugin-singlefile": "^2.3.0",
     "vitest": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
