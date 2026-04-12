@@ -38,6 +38,22 @@ It is not tied to any specific website deployment.
 - shows `BTC` exposure implied by a given `IBIT` share count
 - exposes the core math in a small static app that other builders can reuse
 
+## Why this repo is different
+
+Most public Bitcoin ETF tools fall into one of three buckets:
+
+- closed calculators focused on options or strike conversion
+- generic Bitcoin ETF fee and performance comparison tools
+- fund-specific utilities that are not open source or easy to embed
+
+This repo is intentionally different:
+
+- `IBIT` first, not a diluted generic finance tool
+- open source and easy to inspect
+- static by default, so it can be dropped into a site, dashboard, or internal tool
+- paired with a live demo and a JSON API companion
+- builder-friendly foundation for ETF widgets, watchlists, and weekend pricing tools
+
 ## Formula
 
 The estimate is anchored to the latest official `IBIT` trading snapshot:
@@ -95,6 +111,16 @@ Contributions are welcome, especially around interoperability, snapshot automati
 
 - Start here: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Open issues: [github.com/Bortlesboat/ibit-btc-ratio-calculator/issues](https://github.com/Bortlesboat/ibit-btc-ratio-calculator/issues)
+
+## Roadmap
+
+The highest-leverage next improvements are:
+
+- shareable URLs with preset BTC price and share count
+- JSON and embeddable outputs for builders
+- automated snapshot refreshes
+- options-focused conversion workflows
+- optional support for additional spot Bitcoin ETFs while keeping `IBIT` as the default path
 
 ## Notes
 
