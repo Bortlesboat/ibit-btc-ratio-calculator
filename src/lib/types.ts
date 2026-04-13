@@ -1,4 +1,6 @@
-export interface IbitSnapshot {
+export type SupportedEtfKey = "ibit";
+
+export interface EtfSnapshot {
   ticker: string;
   date: string;
   nav: number;
@@ -11,10 +13,16 @@ export interface IbitSnapshot {
   sourceUrl: string;
 }
 
+export interface EtfDefinition {
+  key: SupportedEtfKey;
+  ticker: string;
+  snapshot: EtfSnapshot;
+}
+
 export interface EstimateInput {
   btcNow: number;
   sharesOwned: number;
-  snapshot: IbitSnapshot;
+  snapshot: EtfSnapshot;
 }
 
 export interface EstimateResult {

@@ -1,7 +1,6 @@
-import snapshot from "./data/ibit-latest.json";
 import { computeEstimate } from "./lib/calc";
 import { formatUsd } from "./lib/format";
-import type { IbitSnapshot } from "./lib/types";
+import { getDefaultEtfKey, getEtfDefinition } from "./lib/etf-registry";
 import { fetchLiveBitcoinPrice } from "./lib/live-price";
 import { renderEstimateCards, renderSourceCard } from "./lib/render";
 import { parseShareableState, toShareableSearch } from "./lib/url-state";
@@ -12,9 +11,10 @@ if (!root) {
   throw new Error("App root not found");
 }
 
-const ibitSnapshot = snapshot as IbitSnapshot;
-const defaultBtcPrice = ibitSnapshot.benchmark;
 const sharedState = parseShareableState(window.location.search);
+const activeEtf = getEtfDefinition(sharedState.etfKey);
+const activeSnapshot = activeEtf.snapshot;
+const defaultBtcPrice = activeSnapshot.benchmark;
 
 root.innerHTML = `
   <main class="page-shell">
@@ -98,7 +98,7 @@ if (!btcPriceInput || !sharesInput || !livePriceStatus || !sourceCard) {
 
 btcPriceInput.value = sharedState.btcPrice !== null ? `${sharedState.btcPrice}` : defaultBtcPrice.toString();
 sharesInput.value = sharedState.sharesOwned !== null ? `${sharedState.sharesOwned}` : sharesInput.value;
-renderSourceCard(sourceCard, ibitSnapshot);
+renderSourceCard(sourceCard, activeSnapshot);
 
 function parseNumber(value: string): number {
   const normalized = value.replace(/,/g, "").trim();
@@ -108,8 +108,11 @@ function parseNumber(value: string): number {
 
 function syncShareableUrl(): void {
   const search = toShareableSearch({
+    etfKey: activeEtf.key,
     btcPrice: parseNumber(btcPriceInput.value),
     sharesOwned: parseNumber(sharesInput.value),
+  }, {
+    defaultEtfKey: getDefaultEtfKey(),
   });
   const nextUrl = `${window.location.pathname}${search}${window.location.hash}`;
   window.history.replaceState({}, "", nextUrl);
@@ -119,9 +122,9 @@ function updateEstimate(): void {
   const btcNow = parseNumber(btcPriceInput.value);
   const sharesOwned = parseNumber(sharesInput.value);
   const estimate = computeEstimate({
-    btcNow: btcNow || ibitSnapshot.benchmark,
+    btcNow: btcNow || activeSnapshot.benchmark,
     sharesOwned,
-      snapshot: ibitSnapshot,
+    snapshot: activeSnapshot,
   });
 
   syncShareableUrl();
@@ -129,7 +132,7 @@ function updateEstimate(): void {
     estimatedIbitPrice: formatUsd(estimate.estimatedIbitNow),
     estimatedPositionValue: formatUsd(estimate.estimatedPositionValue),
     estimatedBtcExposure: `${estimate.estimatedBtcExposure.toFixed(6)} BTC`,
-    ratioText: `1 IBIT = ${estimate.btcPerIbit.toFixed(9)} BTC`,
+    ratioText: `1 ${activeEtf.ticker} = ${estimate.btcPerIbit.toFixed(9)} BTC`,
   });
 }
 
