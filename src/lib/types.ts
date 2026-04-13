@@ -16,6 +16,11 @@ export interface EtfSnapshot {
 export interface EtfDefinition {
   key: SupportedEtfKey;
   ticker: string;
+  eyebrow: string;
+  shareLabel: string;
+  officialSourceName: string;
+  officialSourceLinkLabel: string;
+  snapshotApiPath: string;
   snapshot: EtfSnapshot;
 }
 

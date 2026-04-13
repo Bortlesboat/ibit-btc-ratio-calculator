@@ -26,10 +26,12 @@
     "build": "vite build",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
     "refresh:snapshot": "tsx scripts/refresh-ibit-snapshot.ts",
     "export:static": "powershell -ExecutionPolicy Bypass -File scripts/export-static.ps1"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "@playwright/test": "^1.54.0",
     "cheerio": "^1.1.0",
     "tsx": "^4.20.0",

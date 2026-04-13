@@ -1,4 +1,4 @@
-import type { EtfSnapshot } from "./types";
+import type { EtfDefinition, EtfSnapshot } from "./types";
 
 interface EstimateCardValues {
   estimatedIbitPrice: string;
@@ -25,6 +25,7 @@ export function renderEstimateCards(values: EstimateCardValues): void {
 
 export function renderSourceCard(
   target: HTMLElement,
+  definition: EtfDefinition,
   snapshot: EtfSnapshot,
 ): void {
   const btcPerIbit = snapshot.nav / snapshot.benchmark;
@@ -36,7 +37,7 @@ export function renderSourceCard(
   target.innerHTML = `
     <h2>Official snapshot anchor</h2>
     <p>
-      Snapshot date <strong>${snapshot.date}</strong> from the official iShares
+      Snapshot date <strong>${snapshot.date}</strong> from the official ${definition.officialSourceName}
       <code>${snapshot.ticker}</code> page. These are the exact fields used to anchor the weekend estimate.
     </p>
     <div class="source-list">
@@ -51,6 +52,6 @@ export function renderSourceCard(
       <div class="source-row"><span>Shares outstanding</span><strong>${integerFormat.format(snapshot.sharesOutstanding)}</strong></div>
       <div class="source-row"><span>Basket Bitcoin amount</span><strong>${snapshot.basketBitcoinAmount.toFixed(2)} BTC</strong></div>
     </div>
-    <p><a href="${snapshot.sourceUrl}" target="_blank" rel="noreferrer">View official iShares source</a></p>
+    <p><a href="${snapshot.sourceUrl}" target="_blank" rel="noreferrer">${definition.officialSourceLinkLabel}</a></p>
   `;
 }

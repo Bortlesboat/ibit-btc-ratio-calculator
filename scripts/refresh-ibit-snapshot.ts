@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import * as cheerio from "cheerio";
 
-import type { IbitSnapshot } from "../src/lib/types";
+import type { EtfSnapshot } from "../src/lib/types";
 
 const SOURCE_URL = "https://www.ishares.com/us/products/333011/ishares-bitcoin-trust-etf";
 
@@ -27,7 +27,7 @@ function parseAsOfDate(raw: string): string {
   return Number.isNaN(parsed.getTime()) ? raw : parsed.toISOString().slice(0, 10);
 }
 
-export function parseIbitSnapshot(html: string): IbitSnapshot {
+export function parseIbitSnapshot(html: string): EtfSnapshot {
   const text = normalizeText(html);
 
   const navDateMatch = text.match(/NAV as of ([A-Za-z]{3} \d{1,2}, \d{4}) \$[\d.,]+/);
@@ -60,7 +60,7 @@ export function parseIbitSnapshot(html: string): IbitSnapshot {
 async function refreshSnapshot(): Promise<void> {
   const response = await fetch(SOURCE_URL, {
     headers: {
-      "User-Agent": "ibit-weekend-calculator/1.0",
+      "User-Agent": "ibit-btc-ratio-calculator/1.0",
       Accept: "text/html,application/xhtml+xml",
     },
   });

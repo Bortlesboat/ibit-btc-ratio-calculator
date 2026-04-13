@@ -8,12 +8,16 @@ describe("computeEstimate", () => {
       btcNow: 73500.75,
       sharesOwned: 5200,
       snapshot: {
+        ticker: "IBIT",
         date: "2026-04-10",
         nav: 41.44,
         close: 41.56,
         benchmark: 73109.73,
         premiumDiscountPct: 0.3,
         sponsorFeePct: 0.25,
+        sharesOutstanding: 1391920000,
+        basketBitcoinAmount: 22.67,
+        sourceUrl: "https://www.ishares.com/us/products/333011/ishares-bitcoin-trust-etf",
       },
     });
 

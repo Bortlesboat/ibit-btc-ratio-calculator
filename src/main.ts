@@ -2,6 +2,7 @@ import { computeEstimate } from "./lib/calc";
 import { formatUsd } from "./lib/format";
 import { getDefaultEtfKey, getEtfDefinition } from "./lib/etf-registry";
 import { fetchLiveBitcoinPrice } from "./lib/live-price";
+import { fetchLiveEtfSnapshot } from "./lib/live-snapshot";
 import { renderEstimateCards, renderSourceCard } from "./lib/render";
 import { parseShareableState, toShareableSearch } from "./lib/url-state";
 
@@ -13,16 +14,17 @@ if (!root) {
 
 const sharedState = parseShareableState(window.location.search);
 const activeEtf = getEtfDefinition(sharedState.etfKey);
-const activeSnapshot = activeEtf.snapshot;
+let activeSnapshot = activeEtf.snapshot;
 const defaultBtcPrice = activeSnapshot.benchmark;
+let isUsingAutoBtcValue = sharedState.btcPrice === null;
 
 root.innerHTML = `
   <main class="page-shell">
     <section class="hero">
-      <p class="eyebrow">Weekend estimator for IBIT holders</p>
-      <h1>What Is IBIT Worth Right Now?</h1>
+      <p class="eyebrow">${activeEtf.eyebrow}</p>
+      <h1>What Is ${activeEtf.ticker} Worth Right Now?</h1>
       <p class="subtitle">
-        Estimate <code>IBIT</code> from live Bitcoin price when the market is closed, then translate your shares into current BTC exposure.
+        Estimate <code>${activeEtf.ticker}</code> from live Bitcoin price when the market is closed, then translate your shares into current BTC exposure.
       </p>
     </section>
 
@@ -33,8 +35,8 @@ root.innerHTML = `
           <input id="btc-price" aria-label="Bitcoin price now" inputmode="decimal" />
         </label>
         <label class="input-card">
-          <span class="input-label">IBIT shares</span>
-          <input id="ibit-shares" aria-label="IBIT shares" inputmode="decimal" value="0" />
+          <span class="input-label">${activeEtf.shareLabel}</span>
+          <input id="ibit-shares" aria-label="${activeEtf.shareLabel}" inputmode="decimal" value="0" />
         </label>
       </div>
 
@@ -64,7 +66,7 @@ root.innerHTML = `
       <article class="story-card">
         <h2>How we calculate this</h2>
         <p>
-          We anchor the estimate to the last official <code>IBIT</code> trading snapshot and scale it by the current Bitcoin price.
+          We anchor the estimate to the last official <code>${activeEtf.ticker}</code> trading snapshot and scale it by the current Bitcoin price.
         </p>
         <ul class="formula-list">
           <li><code>btc_per_ibit = nav / benchmark</code></li>
@@ -78,7 +80,7 @@ root.innerHTML = `
     <section class="faq-card">
       <h2>Important caveat</h2>
       <p>
-        This is an informational estimate, not an exact Monday-open prediction. <code>IBIT</code> can open above or below this number because ETF premiums, discounts, and broader market sentiment can move independently from weekend Bitcoin trading.
+        This is an informational estimate, not an exact Monday-open prediction. <code>${activeEtf.ticker}</code> can open above or below this number because ETF premiums, discounts, and broader market sentiment can move independently from weekend Bitcoin trading.
       </p>
       <p class="footnote">
         Not affiliated with BlackRock. Always verify with the official fund page before making a trading decision.
@@ -87,18 +89,24 @@ root.innerHTML = `
   </main>
 `;
 
-const btcPriceInput = document.querySelector<HTMLInputElement>("#btc-price");
-const sharesInput = document.querySelector<HTMLInputElement>("#ibit-shares");
-const livePriceStatus = document.querySelector<HTMLParagraphElement>("#live-price-status");
-const sourceCard = document.querySelector<HTMLDivElement>("#source-card");
+function requireElement<T extends Element>(selector: string): T {
+  const element = document.querySelector<T>(selector);
 
-if (!btcPriceInput || !sharesInput || !livePriceStatus || !sourceCard) {
-  throw new Error("Required calculator elements are missing");
+  if (!element) {
+    throw new Error(`Required calculator element missing: ${selector}`);
+  }
+
+  return element;
 }
+
+const btcPriceInput = requireElement<HTMLInputElement>("#btc-price");
+const sharesInput = requireElement<HTMLInputElement>("#ibit-shares");
+const livePriceStatus = requireElement<HTMLParagraphElement>("#live-price-status");
+const sourceCard = requireElement<HTMLDivElement>("#source-card");
 
 btcPriceInput.value = sharedState.btcPrice !== null ? `${sharedState.btcPrice}` : defaultBtcPrice.toString();
 sharesInput.value = sharedState.sharesOwned !== null ? `${sharedState.sharesOwned}` : sharesInput.value;
-renderSourceCard(sourceCard, activeSnapshot);
+renderSourceCard(sourceCard, activeEtf, activeSnapshot);
 
 function parseNumber(value: string): number {
   const normalized = value.replace(/,/g, "").trim();
@@ -136,7 +144,26 @@ function updateEstimate(): void {
   });
 }
 
+void fetchLiveEtfSnapshot(activeEtf)
+  .then((snapshot) => {
+    const shouldRefreshAutoBtcValue =
+      isUsingAutoBtcValue && parseNumber(btcPriceInput.value) === activeSnapshot.benchmark;
+
+    activeSnapshot = snapshot;
+
+    if (shouldRefreshAutoBtcValue) {
+      btcPriceInput.value = snapshot.benchmark.toString();
+    }
+
+    renderSourceCard(sourceCard, activeEtf, activeSnapshot);
+    updateEstimate();
+  })
+  .catch(() => {
+    renderSourceCard(sourceCard, activeEtf, activeSnapshot);
+  });
+
 btcPriceInput.addEventListener("input", () => {
+  isUsingAutoBtcValue = false;
   livePriceStatus.textContent = "Using manual BTC price input. The shareable URL updates as you type.";
   updateEstimate();
 });

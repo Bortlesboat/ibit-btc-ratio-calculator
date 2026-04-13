@@ -39,3 +39,43 @@ test("shows the official ratio and holdings details in the snapshot card", async
   await expect(page.getByText("Basket Bitcoin amount")).toBeVisible();
   await expect(page.getByTestId("official-ratio")).toContainText("1 IBIT =");
 });
+
+test("prefers the live snapshot endpoint over the bundled snapshot when it is available", async ({ page }) => {
+  await page.route("**/api/v1/tools/ibit-snapshot", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        data: {
+          ticker: "IBIT",
+          date: "2026-04-11",
+          nav: 42,
+          close: 42.1,
+          benchmark: 74000,
+          premium_discount_pct: 0.4,
+          sponsor_fee_pct: 0.25,
+          shares_outstanding: 1393000000,
+          basket_bitcoin_amount: 22.8,
+          source_url: "https://www.ishares.com/us/products/333011/ishares-bitcoin-trust-etf",
+        },
+      }),
+    });
+  });
+
+  await page.route("**/api/v1/prices", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        data: {
+          USD: 74000,
+        },
+      }),
+    });
+  });
+
+  await page.goto("/");
+
+  await expect(page.locator("#source-card").getByText("2026-04-11").first()).toBeVisible();
+  await expect(page.getByTestId("official-ratio")).toContainText("1 IBIT = 0.000567568 BTC");
+});

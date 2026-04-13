@@ -8,12 +8,17 @@ const ETF_DEFINITIONS: Record<SupportedEtfKey, EtfDefinition> = {
   ibit: {
     key: "ibit",
     ticker: "IBIT",
+    eyebrow: "Weekend estimator for IBIT holders",
+    shareLabel: "IBIT shares",
+    officialSourceName: "iShares",
+    officialSourceLinkLabel: "View official iShares source",
+    snapshotApiPath: "/api/v1/tools/ibit-snapshot",
     snapshot: ibitSnapshot as EtfSnapshot,
   },
 };
 
 function isSupportedEtfKey(value: string): value is SupportedEtfKey {
-  return Object.hasOwn(ETF_DEFINITIONS, value);
+  return Object.prototype.hasOwnProperty.call(ETF_DEFINITIONS, value);
 }
 
 export function getDefaultEtfKey(): SupportedEtfKey {

@@ -18,4 +18,13 @@ describe("ETF registry", () => {
     expect(definition.key).toBe("ibit");
     expect(getSupportedEtfKeys()).toEqual(["ibit"]);
   });
+
+  it("stores ETF-specific UI metadata and the live snapshot endpoint with the definition", () => {
+    const definition = getEtfDefinition("ibit");
+
+    expect(definition.eyebrow).toBe("Weekend estimator for IBIT holders");
+    expect(definition.shareLabel).toBe("IBIT shares");
+    expect(definition.officialSourceName).toBe("iShares");
+    expect(definition.snapshotApiPath).toBe("/api/v1/tools/ibit-snapshot");
+  });
 });
