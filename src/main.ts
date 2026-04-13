@@ -4,6 +4,7 @@ import { formatUsd } from "./lib/format";
 import type { IbitSnapshot } from "./lib/types";
 import { fetchLiveBitcoinPrice } from "./lib/live-price";
 import { renderEstimateCards, renderSourceCard } from "./lib/render";
+import { parseShareableState, toShareableSearch } from "./lib/url-state";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 
@@ -13,6 +14,7 @@ if (!root) {
 
 const ibitSnapshot = snapshot as IbitSnapshot;
 const defaultBtcPrice = ibitSnapshot.benchmark;
+const sharedState = parseShareableState(window.location.search);
 
 root.innerHTML = `
   <main class="page-shell">
@@ -36,7 +38,7 @@ root.innerHTML = `
         </label>
       </div>
 
-      <p id="live-price-status" class="status-text">Loading live BTC price...</p>
+      <p id="live-price-status" data-testid="live-price-status" class="status-text">Loading live BTC price...</p>
 
       <div class="result-grid">
         <article class="result-card result-card-primary">
@@ -94,7 +96,8 @@ if (!btcPriceInput || !sharesInput || !livePriceStatus || !sourceCard) {
   throw new Error("Required calculator elements are missing");
 }
 
-btcPriceInput.value = defaultBtcPrice.toString();
+btcPriceInput.value = sharedState.btcPrice !== null ? `${sharedState.btcPrice}` : defaultBtcPrice.toString();
+sharesInput.value = sharedState.sharesOwned !== null ? `${sharedState.sharesOwned}` : sharesInput.value;
 renderSourceCard(sourceCard, ibitSnapshot);
 
 function parseNumber(value: string): number {
@@ -103,15 +106,25 @@ function parseNumber(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function syncShareableUrl(): void {
+  const search = toShareableSearch({
+    btcPrice: parseNumber(btcPriceInput.value),
+    sharesOwned: parseNumber(sharesInput.value),
+  });
+  const nextUrl = `${window.location.pathname}${search}${window.location.hash}`;
+  window.history.replaceState({}, "", nextUrl);
+}
+
 function updateEstimate(): void {
   const btcNow = parseNumber(btcPriceInput.value);
   const sharesOwned = parseNumber(sharesInput.value);
   const estimate = computeEstimate({
     btcNow: btcNow || ibitSnapshot.benchmark,
     sharesOwned,
-    snapshot: ibitSnapshot,
+      snapshot: ibitSnapshot,
   });
 
+  syncShareableUrl();
   renderEstimateCards({
     estimatedIbitPrice: formatUsd(estimate.estimatedIbitNow),
     estimatedPositionValue: formatUsd(estimate.estimatedPositionValue),
@@ -121,19 +134,29 @@ function updateEstimate(): void {
 }
 
 btcPriceInput.addEventListener("input", () => {
-  livePriceStatus.textContent = "Using manual BTC price input.";
+  livePriceStatus.textContent = "Using manual BTC price input. The shareable URL updates as you type.";
   updateEstimate();
 });
 
-sharesInput.addEventListener("input", updateEstimate);
+sharesInput.addEventListener("input", () => {
+  if (sharedState.btcPrice !== null) {
+    livePriceStatus.textContent = "Using BTC price from a shared URL. The shareable link updates as you edit the fields.";
+  }
+  updateEstimate();
+});
 
-void fetchLiveBitcoinPrice()
-  .then((btcPrice) => {
-    btcPriceInput.value = btcPrice.toFixed(2);
-    livePriceStatus.textContent = `Live BTC price loaded from /api/v1/prices: ${formatUsd(btcPrice)}`;
-    updateEstimate();
-  })
-  .catch(() => {
-    livePriceStatus.textContent = `Live BTC price unavailable. Using the last official benchmark anchor of ${formatUsd(defaultBtcPrice)} until you type a manual value.`;
-    updateEstimate();
-  });
+if (sharedState.btcPrice !== null) {
+  livePriceStatus.textContent = "Using BTC price from a shared URL. The shareable link updates as you edit the fields.";
+  updateEstimate();
+} else {
+  void fetchLiveBitcoinPrice()
+    .then((btcPrice) => {
+      btcPriceInput.value = btcPrice.toFixed(2);
+      livePriceStatus.textContent = `Live BTC price loaded from /api/v1/prices: ${formatUsd(btcPrice)}`;
+      updateEstimate();
+    })
+    .catch(() => {
+      livePriceStatus.textContent = `Live BTC price unavailable. Using the last official benchmark anchor of ${formatUsd(defaultBtcPrice)} until you type a manual value.`;
+      updateEstimate();
+    });
+}
