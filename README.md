@@ -22,10 +22,9 @@ Useful for:
 The app is intentionally static so it can be dropped into any site, repo, or simple hosting setup.
 It is not tied to any specific website deployment.
 
-## Live links
+## Hosted status
 
-- Live demo: [bitcoinsapi.com/ibit](https://bitcoinsapi.com/ibit)
-- JSON API companion: [bitcoinsapi.com/api/v1/tools/ibit-estimate](https://bitcoinsapi.com/api/v1/tools/ibit-estimate)
+The project-operated `bitcoinsapi.com` demo and JSON companion are intentionally paused during an infrastructure review. The calculator remains fully usable through the local workflow or as an exported static page.
 
 ## Screenshot
 
@@ -51,7 +50,7 @@ This repo is intentionally different:
 - `IBIT` first, not a diluted generic finance tool
 - open source and easy to inspect
 - static by default, so it can be dropped into a site, dashboard, or internal tool
-- paired with a live demo and a JSON API companion
+- core calculation and URL-state modules that builders can reuse
 - builder-friendly foundation for ETF widgets, watchlists, and weekend pricing tools
 
 ## Formula
@@ -70,8 +69,18 @@ This is a weekend estimate, not a guaranteed Monday opening print.
 
 - check `IBIT` against weekend Bitcoin price moves
 - embed a ratio calculator in a Bitcoin ETF dashboard or watchlist
-- power a simple JSON/API-backed Bitcoin ETF pricing widget
+- reuse the calculation module in a Bitcoin ETF pricing widget
 - compare `IBIT` share exposure against spot `BTC`
+
+## Shareable URL presets
+
+The static calculator accepts and maintains shareable query parameters:
+
+- `?btc=74000`
+- `?shares=350`
+- `?btc=74000&shares=350`
+
+Malformed or negative values are ignored safely, and missing parameters keep the default calculator behavior.
 
 ## Local workflow
 
@@ -116,7 +125,6 @@ Contributions are welcome, especially around interoperability, snapshot automati
 
 The highest-leverage next improvements are:
 
-- shareable URLs with preset BTC price and share count
 - JSON and embeddable outputs for builders
 - automated snapshot refreshes
 - options-focused conversion workflows
